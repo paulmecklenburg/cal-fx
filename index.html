@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cal-FX Guitar Pedal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cal-FX</h1>
+            <p>Low-Latency Guitar Effects</p>
+        </header>
+
+        <section class="device-settings">
+            <div class="control-group">
+                <label for="input-select">Input (Mic/Instrument):</label>
+                <select id="input-select"></select>
+            </div>
+            <div class="control-group">
+                <label for="output-select">Output (Speakers/Headphones):</label>
+                <select id="output-select"></select>
+            </div>
+            <button id="start-btn">Start Audio</button>
+        </section>
+
+        <main id="pedalboard" class="disabled">
+            <div class="pedal octave-pedal">
+                <div class="pedal-label">OCTAVE</div>
+                
+                <div class="knobs">
+                    <div class="knob-container">
+                        <label>MIX</label>
+                        <input type="range" id="mix-knob" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+                    <div class="knob-container">
+                        <label>OCTAVE</label>
+                        <select id="octave-mode">
+                            <option value="-1">Sub ( -1 )</option>
+                            <option value="1">Up ( +1 )</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="foot-switch-container">
+                    <div id="status-led" class="led"></div>
+                    <button id="bypass-btn" class="foot-switch"></button>
+                    <span>BYPASS</span>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="fx.js"></script>
+</body>
+</html>

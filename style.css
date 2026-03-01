@@ -1,0 +1,160 @@
+:root {
+    --pedal-color: #3b3b3b;
+    --pedal-accent: #00ff00;
+    --pedal-off: #550000;
+    --pedal-bg: #1a1a1a;
+    --text-color: #ffffff;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--pedal-bg);
+    color: var(--text-color);
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 3em;
+    margin: 0;
+    color: var(--pedal-accent);
+}
+
+.device-settings {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+.control-group {
+    margin-bottom: 10px;
+}
+
+select, button {
+    padding: 10px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 5px;
+    background: #444;
+    color: white;
+    width: 100%;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #555;
+}
+
+#start-btn {
+    background: var(--pedal-accent);
+    color: black;
+    font-weight: bold;
+}
+
+#pedalboard {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px;
+}
+
+#pedalboard.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.pedal {
+    background-color: var(--pedal-color);
+    width: 200px;
+    height: 350px;
+    border-radius: 15px;
+    border: 3px solid #000;
+    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    position: relative;
+}
+
+.pedal-label {
+    font-size: 2em;
+    font-weight: bold;
+    color: white;
+    margin-top: 10px;
+}
+
+.knobs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.knob-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.knob-container label {
+    font-size: 0.8em;
+    margin-bottom: 5px;
+}
+
+.led {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--pedal-off);
+    margin-bottom: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    transition: 0.2s;
+}
+
+.led.active {
+    background-color: var(--pedal-accent);
+    box-shadow: 0 0 15px var(--pedal-accent);
+}
+
+.foot-switch-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.foot-switch {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #ddd, #999);
+    border: 2px solid #333;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+.foot-switch:active {
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    transform: translateY(2px);
+}
