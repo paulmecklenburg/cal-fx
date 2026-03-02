@@ -1,13 +1,11 @@
 /**
  * Cal-FX: Low-Latency Guitar Pedal
  * 
- * Implements a simple pitch shifter for the octave effect using AudioWorklet.
+ * Implements an octave effect using Tone.js.
  */
 
-let audioContext;
 let inputNode;
-let workletNode;
-let outputNode;
+let pitchShiftNode;
 let isBypass = true;
 
 const startBtn = document.getElementById('start-btn');
@@ -23,7 +21,11 @@ const octaveMode = document.getElementById('octave-mode');
 async function refreshDevices() {
     const devices = await navigator.mediaDevices.enumerateDevices();
     
+    // Clear hardware devices but keep our test options
+    const testOption = inputSelect.querySelector('option[value="test-sine"]');
     inputSelect.innerHTML = '';
+    if (testOption) inputSelect.appendChild(testOption);
+    
     outputSelect.innerHTML = '';
     
     devices.forEach(device => {
@@ -44,94 +46,88 @@ navigator.mediaDevices.ondevicechange = refreshDevices;
 refreshDevices();
 
 async function initAudio() {
-    if (audioContext) return;
-
-    audioContext = new (window.AudioContext || window.webkitAudioContext)({
-        latencyHint: 'interactive'
-    });
-
-    await audioContext.audioWorklet.addModule('pitch-shifter.js');
-
-    workletNode = new AudioWorkletNode(audioContext, 'pitch-shifter-processor');
+    await Tone.start();
     
-    // Initial parameters
-    updatePedalParams();
+    // Create PitchShift node
+    pitchShiftNode = new Tone.PitchShift({
+        pitch: parseFloat(octaveMode.value) * 12,
+        wet: parseFloat(mixKnob.value)
+    }).toDestination();
 
-    startBtn.textContent = 'Audio Engine Running';
-    startBtn.disabled = true;
+    startBtn.textContent = 'Effect ON';
+    isBypass = false;
+    statusLed.classList.add('active');
     pedalboard.classList.remove('disabled');
 
     setupStream();
 }
 
 async function setupStream() {
-    if (inputNode) inputNode.disconnect();
+    if (inputNode) {
+        inputNode.dispose();
+    }
     
-    const constraints = {
-        audio: {
-            deviceId: inputSelect.value ? { exact: inputSelect.value } : undefined,
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false,
-            latency: 0
-        }
-    };
-
     try {
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        inputNode = audioContext.createMediaStreamSource(stream);
+        if (inputSelect.value === 'test-sine') {
+            inputNode = new Tone.Oscillator(440, "sine").start();
+        } else {
+            inputNode = new Tone.UserMedia();
+            await inputNode.open(inputSelect.value);
+        }
         
-        // Output device selection (Chrome only for now)
-        if (typeof audioContext.setSinkId === 'function') {
-            await audioContext.setSinkId(outputSelect.value);
+        // Output device selection
+        if (typeof Tone.getContext().setSinkId === 'function') {
+            await Tone.getContext().setSinkId(outputSelect.value);
         }
 
         connectNodes();
     } catch (err) {
-        console.error('Error accessing microphone:', err);
-        alert('Could not access microphone. Please ensure you have granted permission.');
+        console.error('Error accessing audio source:', err);
+        alert('Could not access audio source. Please ensure you have granted permission.');
     }
 }
 
 function connectNodes() {
-    if (!inputNode || !workletNode) return;
+    if (!inputNode || !pitchShiftNode) return;
 
     inputNode.disconnect();
-    workletNode.disconnect();
-
+    
     if (isBypass) {
-        inputNode.connect(audioContext.destination);
+        inputNode.connect(Tone.getDestination());
     } else {
-        inputNode.connect(workletNode);
-        workletNode.connect(audioContext.destination);
+        inputNode.connect(pitchShiftNode);
     }
 }
 
 function updatePedalParams() {
-    if (!workletNode) return;
+    if (!pitchShiftNode) return;
     
     const mix = parseFloat(mixKnob.value);
     const octave = parseFloat(octaveMode.value);
     
-    // Ratio: 0.5 for octave down, 2.0 for octave up
-    const ratio = octave === -1 ? 0.5 : 2.0;
+    // Tone.PitchShift uses semitones
+    const pitch = octave * 12;
 
-    workletNode.parameters.get('mix').setValueAtTime(mix, audioContext.currentTime);
-    workletNode.parameters.get('ratio').setValueAtTime(ratio, audioContext.currentTime);
+    pitchShiftNode.wet.value = mix;
+    pitchShiftNode.pitch = pitch;
 }
 
 // Event Listeners
-startBtn.addEventListener('click', () => {
-    // Resume context if suspended (browser security policy)
-    if (audioContext && audioContext.state === 'suspended') {
-        audioContext.resume();
+startBtn.addEventListener('click', async () => {
+    if (!pitchShiftNode) {
+        await initAudio();
+    } else {
+        isBypass = !isBypass;
+        statusLed.classList.toggle('active', !isBypass);
+        startBtn.textContent = isBypass ? 'Effect OFF' : 'Effect ON';
+        connectNodes();
     }
-    initAudio();
 });
 
 bypassBtn.addEventListener('click', () => {
     isBypass = !isBypass;
     statusLed.classList.toggle('active', !isBypass);
+    startBtn.textContent = isBypass ? 'Effect OFF' : 'Effect ON';
     connectNodes();
 });
 
@@ -140,8 +136,8 @@ octaveMode.addEventListener('change', updatePedalParams);
 
 inputSelect.addEventListener('change', setupStream);
 outputSelect.addEventListener('change', async () => {
-    if (audioContext && typeof audioContext.setSinkId === 'function') {
-        await audioContext.setSinkId(outputSelect.value);
+    if (typeof Tone.getContext().setSinkId === 'function') {
+        await Tone.getContext().setSinkId(outputSelect.value);
     }
 });
 

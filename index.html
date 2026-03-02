@@ -16,7 +16,9 @@
         <section class="device-settings">
             <div class="control-group">
                 <label for="input-select">Input (Mic/Instrument):</label>
-                <select id="input-select"></select>
+                <select id="input-select">
+                    <option value="test-sine">Test Sine Wave (440Hz)</option>
+                </select>
             </div>
             <div class="control-group">
                 <label for="output-select">Output (Speakers/Headphones):</label>
@@ -37,8 +39,12 @@
                     <div class="knob-container">
                         <label>OCTAVE</label>
                         <select id="octave-mode">
-                            <option value="-1">Sub ( -1 )</option>
-                            <option value="1">Up ( +1 )</option>
+                            <option value="-3">-3 Oct</option>
+                            <option value="-2">-2 Oct</option>
+                            <option value="-1">-1 Oct</option>
+                            <option value="1">+1 Oct</option>
+                            <option value="2">+2 Oct</option>
+                            <option value="3">+3 Oct</option>
                         </select>
                     </div>
                 </div>
@@ -51,6 +57,7 @@
             </div>
         </main>
     </div>
+    <script src="http://unpkg.com/tone"></script>
     <script src="fx.js"></script>
 </body>
 </html>
