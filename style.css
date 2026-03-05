@@ -15,12 +15,25 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.fuzz-pedal {
+    --pedal-color: #5a2d0c;
+    --pedal-accent: #ff8c00;
+}
+
+.fuzz-pedal .knobs {
+    margin-top: 40px;
+}
+
+.fuzz-pedal .knob-container {
+    margin-bottom: 30px;
 }
 
 header {
@@ -137,13 +150,22 @@ button:hover {
     box-shadow: 0 0 15px var(--pedal-accent);
 }
 
+.octave-pedal {
+    --pedal-accent: #00ff00;
+}
+
+.fuzz-pedal {
+    --pedal-color: #5a2d0c;
+    --pedal-accent: #ff8c00;
+}
+
 .foot-switch-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-bottom: 20px;
+    margin-top: auto;
 }
-
 .foot-switch {
     width: 60px;
     height: 60px;

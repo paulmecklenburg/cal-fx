@@ -55,8 +55,29 @@
                 </div>
 
                 <div class="foot-switch-container">
-                    <div id="status-led" class="led"></div>
-                    <button id="bypass-btn" class="foot-switch"></button>
+                    <div id="octave-led" class="led"></div>
+                    <button id="octave-bypass-btn" class="foot-switch"></button>
+                    <span>BYPASS</span>
+                </div>
+            </div>
+
+            <div class="pedal fuzz-pedal">
+                <div class="pedal-label">FUZZ</div>
+                
+                <div class="knobs">
+                    <div class="knob-container">
+                        <label>DRIVE</label>
+                        <input type="range" id="fuzz-drive" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+                    <div class="knob-container">
+                        <label>VOLUME</label>
+                        <input type="range" id="fuzz-volume" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+                </div>
+
+                <div class="foot-switch-container">
+                    <div id="fuzz-led" class="led"></div>
+                    <button id="fuzz-bypass-btn" class="foot-switch"></button>
                     <span>BYPASS</span>
                 </div>
             </div>

@@ -1,12 +1,21 @@
 /**
- * Cal-FX: Low-Latency Guitar Pedal
+ * Cal-FX: Low-Latency Guitar Pedalboard
  * 
- * Implements a multi-octave pedal using Tone.js.
+ * Multi-effect board with Octave and Fuzz.
  */
 
 let inputNode;
-let isBypass = true;
+let isAudioStarted = false;
+
+// Effect Nodes
 let octaveChain;
+let fuzzNode;
+let fuzzGain;
+
+// State
+let isOctaveBypass = true;
+let isFuzzBypass = true;
+
 const octaveSettings = [
     { id: 'octave-m2', pitch: -24, shiftNode: null, gainNode: null },
     { id: 'octave-m1', pitch: -12, shiftNode: null, gainNode: null },
@@ -15,19 +24,25 @@ const octaveSettings = [
     { id: 'octave-p2', pitch: 24,  shiftNode: null, gainNode: null }
 ];
 
+// UI Elements
 const startBtn = document.getElementById('start-btn');
-const bypassBtn = document.getElementById('bypass-btn');
-const statusLed = document.getElementById('status-led');
-const pedalboard = document.getElementById('pedalboard');
 const inputSelect = document.getElementById('input-select');
 const outputSelect = document.getElementById('output-select');
+const pedalboard = document.getElementById('pedalboard');
+
+const octaveBypassBtn = document.getElementById('octave-bypass-btn');
+const octaveLed = document.getElementById('octave-led');
+
+const fuzzBypassBtn = document.getElementById('fuzz-bypass-btn');
+const fuzzLed = document.getElementById('fuzz-led');
+const fuzzDriveSlider = document.getElementById('fuzz-drive');
+const fuzzVolumeSlider = document.getElementById('fuzz-volume');
 
 // Get available audio devices
 async function refreshDevices() {
     try {
         const devices = await navigator.mediaDevices.enumerateDevices();
         
-        // Clear hardware devices but keep our test options
         const testOption = inputSelect.querySelector('option[value="test-sine"]');
         inputSelect.innerHTML = '';
         if (testOption) inputSelect.appendChild(testOption);
@@ -50,7 +65,6 @@ async function refreshDevices() {
     }
 }
 
-// Ensure labels are available
 navigator.mediaDevices.ondevicechange = refreshDevices;
 refreshDevices();
 
@@ -59,9 +73,8 @@ async function initAudio() {
         await Tone.start();
         console.log('Tone.js started');
         
-        // Summary gain node
-        octaveChain = new Tone.Gain(1).toDestination();
-
+        // --- Octave Section ---
+        octaveChain = new Tone.Gain(1);
         octaveSettings.forEach(setting => {
             setting.gainNode = new Tone.Gain(0);
             const slider = document.getElementById(setting.id);
@@ -75,7 +88,6 @@ async function initAudio() {
                     wet: 1
                 });
             } else {
-                // Dry signal doesn't need pitch shift, just a pass-through
                 setting.shiftNode = new Tone.Gain(1);
             }
             
@@ -83,22 +95,35 @@ async function initAudio() {
             setting.gainNode.connect(octaveChain);
         });
 
-        isBypass = false;
+        // --- Fuzz Section ---
+        fuzzNode = new Tone.Distortion({
+            distortion: parseFloat(fuzzDriveSlider.value),
+            oversampling: "4x"
+        });
+        fuzzGain = new Tone.Gain(parseFloat(fuzzVolumeSlider.value));
+        fuzzNode.connect(fuzzGain);
+
+        // Chain effects in series: Octave -> Fuzz -> Destination
+        // Connections are managed in connectNodes()
+        
+        isAudioStarted = true;
+        isOctaveBypass = false;
+        isFuzzBypass = false;
+        
         updateUI();
         await setupStream();
     } catch (err) {
         console.error('Failed to initialize audio:', err);
-        alert('Could not start audio engine. Please ensure you have granted microphone permissions.');
+        alert('Could not start audio engine.');
     }
 }
 
 function updateUI() {
-    if (isBypass) {
-        statusLed.classList.remove('active');
-        startBtn.textContent = 'Effect OFF';
-    } else {
-        statusLed.classList.add('active');
-        startBtn.textContent = 'Effect ON';
+    octaveLed.classList.toggle('active', !isOctaveBypass);
+    fuzzLed.classList.toggle('active', !isFuzzBypass);
+    
+    if (isAudioStarted) {
+        startBtn.textContent = 'Audio Started';
         pedalboard.classList.remove('disabled');
     }
 }
@@ -116,7 +141,6 @@ async function setupStream() {
             await inputNode.open(inputSelect.value);
         }
         
-        // Output device selection
         if (outputSelect.value && typeof Tone.getContext().setSinkId === 'function') {
             await Tone.getContext().setSinkId(outputSelect.value);
         }
@@ -128,59 +152,84 @@ async function setupStream() {
 }
 
 function connectNodes() {
-    if (!inputNode || !octaveChain) return;
+    if (!inputNode || !octaveChain || !fuzzNode) return;
 
     inputNode.disconnect();
-    
-    if (isBypass) {
-        inputNode.connect(Tone.getDestination());
+    octaveChain.disconnect();
+    fuzzGain.disconnect();
+
+    // Octave Pedal Path
+    let octaveOut;
+    if (isOctaveBypass) {
+        // Simple passthrough
+        octaveOut = inputNode;
     } else {
         octaveSettings.forEach(setting => {
-            if (setting.shiftNode) {
-                inputNode.connect(setting.shiftNode);
-            }
+            inputNode.connect(setting.shiftNode);
         });
+        octaveOut = octaveChain;
     }
+
+    // Fuzz Pedal Path
+    let fuzzOut;
+    if (isFuzzBypass) {
+        fuzzOut = octaveOut;
+    } else {
+        octaveOut.connect(fuzzNode);
+        fuzzOut = fuzzGain;
+    }
+
+    fuzzOut.toDestination();
 }
 
-function updatePedalParams() {
+function updateOctaveParams() {
     octaveSettings.forEach(setting => {
         if (setting.gainNode) {
             const slider = document.getElementById(setting.id);
             if (slider) {
-                // Smoothly ramp to the new volume to avoid clicks
                 setting.gainNode.gain.setTargetAtTime(parseFloat(slider.value), Tone.now(), 0.05);
             }
         }
     });
 }
 
+function updateFuzzParams() {
+    if (fuzzNode && fuzzGain) {
+        fuzzNode.distortion = parseFloat(fuzzDriveSlider.value);
+        fuzzGain.gain.setTargetAtTime(parseFloat(fuzzVolumeSlider.value), Tone.now(), 0.05);
+    }
+}
+
 // Event Listeners
 startBtn.addEventListener('click', async () => {
-    if (!octaveChain) {
+    if (!isAudioStarted) {
         await initAudio();
-    } else {
-        isBypass = !isBypass;
+    }
+});
+
+octaveBypassBtn.addEventListener('click', () => {
+    if (isAudioStarted) {
+        isOctaveBypass = !isOctaveBypass;
         updateUI();
         connectNodes();
     }
 });
 
-bypassBtn.addEventListener('click', () => {
-    if (octaveChain) {
-        isBypass = !isBypass;
+fuzzBypassBtn.addEventListener('click', () => {
+    if (isAudioStarted) {
+        isFuzzBypass = !isFuzzBypass;
         updateUI();
         connectNodes();
     }
 });
 
-// Attach event listeners to all octave sliders
 octaveSettings.forEach(setting => {
     const slider = document.getElementById(setting.id);
-    if (slider) {
-        slider.addEventListener('input', updatePedalParams);
-    }
+    if (slider) slider.addEventListener('input', updateOctaveParams);
 });
+
+fuzzDriveSlider.addEventListener('input', updateFuzzParams);
+fuzzVolumeSlider.addEventListener('input', updateFuzzParams);
 
 inputSelect.addEventListener('change', setupStream);
 outputSelect.addEventListener('change', async () => {
@@ -189,9 +238,7 @@ outputSelect.addEventListener('change', async () => {
     }
 });
 
-// Trigger device permission prompt early to get labels
+// Trigger device permission prompt early
 navigator.mediaDevices.getUserMedia({ audio: true })
     .then(refreshDevices)
-    .catch(err => {
-        console.warn('Initial mic check failed - labels may be generic until Start Audio is clicked:', err);
-    });
+    .catch(err => console.warn('Mic check failed:', err));
