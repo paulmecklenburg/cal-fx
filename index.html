@@ -33,19 +33,24 @@
                 
                 <div class="knobs">
                     <div class="knob-container">
-                        <label>MIX</label>
-                        <input type="range" id="mix-knob" min="0" max="1" step="0.01" value="0.5">
+                        <label>-2 OCT</label>
+                        <input type="range" id="octave-m2" min="0" max="1" step="0.01" value="0">
                     </div>
                     <div class="knob-container">
-                        <label>OCTAVE</label>
-                        <select id="octave-mode">
-                            <option value="-3">-3 Oct</option>
-                            <option value="-2">-2 Oct</option>
-                            <option value="-1">-1 Oct</option>
-                            <option value="1">+1 Oct</option>
-                            <option value="2">+2 Oct</option>
-                            <option value="3">+3 Oct</option>
-                        </select>
+                        <label>-1 OCT</label>
+                        <input type="range" id="octave-m1" min="0" max="1" step="0.01" value="0">
+                    </div>
+                    <div class="knob-container">
+                        <label>DRY (0)</label>
+                        <input type="range" id="octave-0" min="0" max="1" step="0.01" value="1">
+                    </div>
+                    <div class="knob-container">
+                        <label>+1 OCT</label>
+                        <input type="range" id="octave-p1" min="0" max="1" step="0.01" value="0">
+                    </div>
+                    <div class="knob-container">
+                        <label>+2 OCT</label>
+                        <input type="range" id="octave-p2" min="0" max="1" step="0.01" value="0">
                     </div>
                 </div>
 
@@ -57,7 +62,7 @@
             </div>
         </main>
     </div>
-    <script src="//unpkg.com/tone"></script>
+    <script src="https://unpkg.com/tone"></script>
     <script src="fx.js"></script>
 </body>
 </html>
