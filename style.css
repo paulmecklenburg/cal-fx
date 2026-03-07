@@ -28,14 +28,6 @@ body {
     --pedal-accent: #ff8c00;
 }
 
-.fuzz-pedal .knobs {
-    margin-top: 40px;
-}
-
-.fuzz-pedal .knob-container {
-    margin-bottom: 30px;
-}
-
 header {
     text-align: center;
     margin-bottom: 20px;
@@ -59,7 +51,7 @@ header h1 {
     margin-bottom: 10px;
 }
 
-select, button {
+select {
     padding: 10px;
     margin-top: 5px;
     border: none;
@@ -70,14 +62,41 @@ select, button {
     cursor: pointer;
 }
 
-button:hover {
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.actions button {
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    background: #444;
+    color: white;
+    flex: 1;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.actions button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.actions button:hover:not(:disabled) {
     background: #555;
 }
 
 #start-btn {
     background: var(--pedal-accent);
     color: black;
-    font-weight: bold;
+}
+
+#mute-btn.muted {
+    background: #ff4444;
+    color: white;
 }
 
 #pedalboard {
@@ -95,14 +114,14 @@ button:hover {
 .pedal {
     background-color: var(--pedal-color);
     width: 200px;
-    height: 450px;
+    height: 550px;
     border-radius: 15px;
     border: 3px solid #000;
     box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     padding: 20px;
     position: relative;
 }
@@ -112,6 +131,7 @@ button:hover {
     font-weight: bold;
     color: white;
     margin-top: 10px;
+    margin-bottom: 20px;
 }
 
 .knobs {

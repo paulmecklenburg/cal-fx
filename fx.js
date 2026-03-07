@@ -26,6 +26,7 @@ const octaveSettings = [
 
 // UI Elements
 const startBtn = document.getElementById('start-btn');
+const muteBtn = document.getElementById('mute-btn');
 const inputSelect = document.getElementById('input-select');
 const outputSelect = document.getElementById('output-select');
 const pedalboard = document.getElementById('pedalboard');
@@ -125,6 +126,15 @@ function updateUI() {
     if (isAudioStarted) {
         startBtn.textContent = 'Audio Started';
         pedalboard.classList.remove('disabled');
+        muteBtn.disabled = false;
+    }
+
+    if (Tone.Destination.mute) {
+        muteBtn.textContent = 'Unmute Audio';
+        muteBtn.classList.add('muted');
+    } else {
+        muteBtn.textContent = 'Mute Audio';
+        muteBtn.classList.remove('muted');
     }
 }
 
@@ -230,6 +240,11 @@ octaveSettings.forEach(setting => {
 
 fuzzDriveSlider.addEventListener('input', updateFuzzParams);
 fuzzVolumeSlider.addEventListener('input', updateFuzzParams);
+
+muteBtn.addEventListener('click', () => {
+    Tone.Destination.mute = !Tone.Destination.mute;
+    updateUI();
+});
 
 inputSelect.addEventListener('change', setupStream);
 outputSelect.addEventListener('change', async () => {
