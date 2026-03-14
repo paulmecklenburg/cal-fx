@@ -17,7 +17,7 @@
             <div class="control-group">
                 <label for="input-select">Input (Mic/Instrument):</label>
                 <select id="input-select">
-                    <option value="test-sine">Test Sine Wave (440Hz)</option>
+                    <option value="test-wave">Test Wave (440Hz)</option>
                 </select>
             </div>
             <div class="control-group">
@@ -31,6 +31,27 @@
         </section>
 
         <main id="pedalboard" class="disabled">
+            <div class="pedal theremin-pedal">
+                <div class="pedal-label">THEREMIN</div>
+                
+                <div class="knobs">
+                    <div class="knob-container">
+                        <label>SENS</label>
+                        <input type="range" id="theremin-sens" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+                    <div class="knob-container">
+                        <label>GLIDE</label>
+                        <input type="range" id="theremin-glide" min="0" max="0.5" step="0.01" value="0.1">
+                    </div>
+                </div>
+
+                <div class="foot-switch-container">
+                    <div id="theremin-led" class="led"></div>
+                    <button id="theremin-bypass-btn" class="foot-switch"></button>
+                    <span>BYPASS</span>
+                </div>
+            </div>
+
             <div class="pedal octave-pedal">
                 <div class="pedal-label">OCTAVE</div>
                 
